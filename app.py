@@ -29,8 +29,8 @@ def save_prediction(data):
     conn.close()
 
 # ✅ Load the ML Model
-#"D:\1HeartDiseasePrediction\HeartDiseasePrediction\ML model\best_heart_disease_model(2).pkl"
-model_path = "D:\\1HeartDiseasePrediction\\HeartDiseasePrediction - Copy - Copy\\ML model\\best_heart_disease_model(2).pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "ML_model", "best_heart_disease_model.pkl")
 with open(model_path, "rb") as file:
     model = pickle.load(file)
 
