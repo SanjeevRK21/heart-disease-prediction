@@ -111,15 +111,24 @@
         <h2 class="text-6xl font-extrabold text-white mb-6 drop-shadow-lg">Prediction Result 💡</h2>
         
         <div class="bg-gradient-to-b from-black to-white p-6 rounded-lg shadow-lg">
-            <p class="text-4xl font-bold text-gray-900 mb-4">{{ prediction_text }}</p>
-            <p class="text-4xl font-bold text-pink-400 mt-2">Risk Percentage: <span class="animate-pulse">{{ prob_yes }}%</span></p>
+           {% if prediction_text %}
+            <p class="text-xl font-semibold text-white">{{ prediction_text }}</p>
+        {% endif %}
+
+        <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+            <p class="text-gray-600 text-lg">Probability of No Heart Disease: 
+                <span class="font-bold text-green-600">{{ prob_no }}%</span>
+            </p>
+            <p class="text-gray-600 text-lg">Probability of Heart Disease: 
+                <span class="font-bold {% if prob_yes > 50 %}text-red-600{% else %}text-yellow-600{% endif %}">{{ prob_yes }}%</span>
+            </p>
         </div>
 
         <div class="mt-8">
             <p class="text-lg font-semibold text-pink-300">If there is a server issue:</p>
             
             <!-- Button -->
-            <button onclick="window.open('https://colab.research.google.com/drive/1ZsaDVTFVzef1E-fI0HKFK-JS0hmCKvNv?usp=sharing', '_blank')" 
+            <button onclick="window.open('https://colab.research.google.com/drive/1ZsaDVTFVzef1E-fI0HKFK-JS0hmCKvNv?usp=sharing')" 
                     class="mt-6 px-8 py-4 text-white font-semibold text-lg rounded-lg bg-pink-300 hover:bg-pink-200 transform hover:scale-110 transition duration-300">
                 Go to Colab Notebook
             </button>
@@ -137,7 +146,7 @@
 
     <!-- Displaying the prediction result dynamically -->
     <div class="mt-8 text-center fade-in bg-gradient-to-b from-white to-white">
-        {% if prediction == 1 %}
+        {% if prediction_text == 1 %}
             <p class="text-3xl font-semibold text-red-600">⚠️ High Risk of Heart Disease</p>
             <p class="text-lg text-gray-700 mt-4">We recommend consulting a doctor for further medical advice.</p>
             <img src="https://t3.ftcdn.net/jpg/04/36/13/94/360_F_436139487_978WQWII8AD4NGCKWfbR95dqpdcXranr.jpg" alt="High Risk" class="mx-auto w-1/2 md:w-1/3 mt-6">

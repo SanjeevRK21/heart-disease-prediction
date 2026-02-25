@@ -1,3 +1,0 @@
-id,age,sex,chestpaintype,restingbp,cholesterol,fastingbs,restingecg,maxhr,exerciseangina,oldpeak,st_slope,prediction,probability
-1,35,1,1,130,220,0,1,160,0,2.0,0,AAAAAAAAAAA=,39.0
-2,45,1,2,120,230,0,1,150,0,1.2,2,1,85.5

@@ -1,26 +1,36 @@
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
-import sqlite3  # ✅ Import SQLite
+import psycopg2
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
 
-# ✅ Function to Save Prediction using SQLite (database2.db)
 def save_prediction(data):
-    conn = sqlite3.connect('database2.db')
+    # Load environment variables
+    load_dotenv()
+
+    # Get database URL
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    # Connect
+    conn = psycopg2.connect(DATABASE_URL)
+
     cursor = conn.cursor()
-    
+ 
     query = '''INSERT INTO prediction2 (age, sex, chestpaintype, restingbp, cholesterol, 
                fastingbs, restingecg, maxhr, exerciseangina, oldpeak, st_slope, prediction, probability) 
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
     
     cursor.execute(query, data)
     conn.commit()
     conn.close()
 
 # ✅ Load the ML Model
-model_path = "C:\\Users\\Rajendra\\Desktop\\heart_disease_prediction\\best_heart_disease_model(2).pkl"
+#"D:\1HeartDiseasePrediction\HeartDiseasePrediction\ML model\best_heart_disease_model(2).pkl"
+model_path = "D:\\1HeartDiseasePrediction\\HeartDiseasePrediction - Copy - Copy\\ML model\\best_heart_disease_model(2).pkl"
 with open(model_path, "rb") as file:
     model = pickle.load(file)
 
@@ -48,13 +58,20 @@ def predict():
             
             # ✅ Make Prediction
             prediction = int(model.predict(input_features)[0])  # Convert to int to avoid BLOB issue
-            probability = float(model.predict_proba(input_features)[0][1])  # No rounding
+            probability_no = float(model.predict_proba(input_features)[0][0])  # No rounding
+            probability_yes = float(model.predict_proba(input_features)[0][1])  # No rounding
 
-            return render_template('result.html', prediction=prediction, probability=probability)
+
+            data_to_save = tuple(map(float, input_features[0])) + (int(prediction), float(probability_yes))
+            save_prediction(data_to_save)
+
+            return render_template('result.html', prediction_text=prediction, 
+                                   prob_no=probability_no, prob_yes=probability_yes)
         except Exception as e:
             return f"Error: {e}"
 
     return render_template('predict.html')
+
 
 @app.route('/predict2', methods=['GET', 'POST'])
 def predict2():
@@ -68,11 +85,11 @@ def predict2():
             probability_no = float(model.predict_proba(input_features)[0][0])  # No rounding
             probability_yes = float(model.predict_proba(input_features)[0][1])  # No rounding
 
-            # Save to SQLite (database2.db)
+    
             data_to_save = tuple(input_features[0]) + (prediction, probability_yes)
             save_prediction(data_to_save)
 
-            return render_template('result2.html', prediction_text=f"Prediction: {prediction}", 
+            return render_template('result2.html', prediction_text=prediction, 
                                    prob_no=probability_no, prob_yes=probability_yes)
         except Exception as e:
             return f"Error: {e}"
@@ -91,13 +108,16 @@ def save_prediction2():
             float(request.form['probability'])  # Convert to float
         )
 
-        # ✅ Save to database2.db
-        conn = sqlite3.connect('database2.db')
+
+        conn = psycopg2.connect(
+        "postgresql://postgres.yitmynulseuoekzdajpg:Ax0vvu26Apj9UlL7@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
+        )
         cursor = conn.cursor()
+
 
         query = '''INSERT INTO prediction2 (age, sex, chestpaintype, restingbp, cholesterol, 
                    fastingbs, restingecg, maxhr, exerciseangina, oldpeak, st_slope, prediction, probability) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
 
         cursor.execute(query, data)
         conn.commit()
